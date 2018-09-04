@@ -18,7 +18,7 @@ else
     echo 'Created N2P'
 fi
 mkdir ~/Native2Proton/$appid/
-cd .steamcmd
+cd ~/.steamcmd
 curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
 chmod +x ~/.steamcmd/steamcmd.sh
 echo "Please enter your Steam username and press enter: "
