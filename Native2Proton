@@ -50,7 +50,7 @@ else
     echo "creating wine prefix"
     mkdir ~/Native2Proton/$appid/pfx
     absolute="$(dirname ~/Native2Proton/$appid/pfx)"
-    userpath="$dirname ~/Native2Proton)"
+    userpath="$(dirname ~/Native2Proton)"
     WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wine" "wineboot" &
     wait %1
     echo "Installing dxvk..."
