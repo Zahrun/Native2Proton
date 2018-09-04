@@ -65,7 +65,6 @@ else
         WINEPREFIX="'$absolute'/pfx/" \
         SteamGameId="'$appid'" \
         SteamAppId="'$appid'" \
-        WINEDLLOVERRIDES="d3d11=n;dxgi=n" \
         STEAM_COMPAT_CLIENT_INSTALL_PATH="'$userpath'/.local/share/Steam" \' >> ~/Native2Proton/$appid/rungame.sh
     echo '"'$protonpath'/dist/bin//wine64" "${@:-${DEF_CMD[@]}}"' >> ~/Native2Proton/$appid/rungame.sh
     echo "Runner created. Launch game with: '~/Native2Proton/$appid/rungame.sh'"
