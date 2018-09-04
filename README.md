@@ -3,7 +3,7 @@ Force-download and run Windows versions of Steam Linux games using Proton
 
 Native2Proton is a runner for forcing the install and execution of Windows versions of Steam games rather than running the native Linux version.
 
-Depends on winetricks. Please ensure it is installed: '''sudo dpkg -s winetricks'''
+Depends on winetricks. Please ensure it is installed: ```sudo dpkg -s winetricks```
 
 To clone the repo: 
 
