@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 echo "Native2Proton"
 echo "Please enter the steam appid of the game you would like to download"
 read appid
