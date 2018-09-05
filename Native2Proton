@@ -23,7 +23,7 @@ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.g
 chmod +x ~/.steamcmd/steamcmd.sh
 echo "Please enter your Steam username and press enter: "
 read username
-~/.steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +login $username +force_install_dir "$downloaddir" +app_update $appid validate +quit
+~/.steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +login "$username" +force_install_dir "$downloaddir" +app_update $appid validate +quit
 echo "Download complete, creating symlink..."
 ln -s "$downloaddir" ~/Native2Proton/$appid/data
 cd ~
@@ -53,7 +53,7 @@ else
     userpath="$(dirname ~/Native2Proton)"
     WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wine" "wineboot" &
     wait %1
-    sleep 5 #Sleep workaround because wine is not returning cleanly and dxvk install is failing
+    sleep 5 #workaround as wine is not returning cleanly.Solution is probably to use wineserver - To do list
     echo "Installing dxvk..."
     export WINEPREFIX="$absolute/pfx/"
     winetricks dxvk
