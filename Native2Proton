@@ -54,7 +54,8 @@ else
     WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wine" "wineboot" &
     wait %1
     echo "Installing dxvk..."
-    WINEPREFIX="$absolute/pfx/" winetricks dxvk
+    export WINEPREFIX="$absolute/pfx/"
+    winetricks dxvk
     echo "Creating runner..."
     exe="${list[$selectid]}"
     echo "#!/bin/bash" > ~/Native2Proton/$appid/rungame.sh
