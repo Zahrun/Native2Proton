@@ -51,9 +51,8 @@ else
     mkdir ~/Native2Proton/$appid/pfx
     absolute="$(dirname ~/Native2Proton/$appid/pfx)"
     userpath="$(dirname ~/Native2Proton)"
-    WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wine" "wineboot" &
-    wait %1
-    sleep 5 #workaround as wine is not returning cleanly.Solution is probably to use wineserver - To do list
+    WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wineserver" "wineboot" "-w" &
+    sleep 2 #workaround as wineserver is not returning cleanly every time.
     echo "Installing dxvk..."
     export WINEPREFIX="$absolute/pfx/"
     winetricks dxvk
