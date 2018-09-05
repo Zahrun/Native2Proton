@@ -53,6 +53,7 @@ else
     userpath="$(dirname ~/Native2Proton)"
     WINEPREFIX="$absolute/pfx/" "$protonpath/dist/bin/wine" "wineboot" &
     wait %1
+    sleep 5 #Sleep workaround because wine is not returning cleanly and dxvk install is failing
     echo "Installing dxvk..."
     export WINEPREFIX="$absolute/pfx/"
     winetricks dxvk
