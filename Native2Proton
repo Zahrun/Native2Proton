@@ -57,9 +57,11 @@ else
     echo "Installing dxvk..."
     export WINEPREFIX="$absolute/pfx/"
     winetricks dxvk
+    echo "Installing xact..."
+    winetricks xact
     echo "Creating runner..."
     exe="${list[$selectid]}"
-    echo "#!/bin/bash" > ~/Native2Proton/$appid/rungame.sh
+    echo "#!/usr/bin/env bash" > ~/Native2Proton/$appid/rungame.sh
     echo 'DEF_CMD=("'$absolute'/data/'$exe'")' >> ~/Native2Proton/$appid/rungame.sh
     echo 'PATH="'$protonpath'/dist/bin/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin" \
         TERM="xterm" \
@@ -69,6 +71,7 @@ else
         WINEPREFIX="'$absolute'/pfx/" \
         SteamGameId="'$appid'" \
         SteamAppId="'$appid'" \
+        WINEDLLOVERRIDES="xaudio2_7=n,b" \
         STEAM_COMPAT_CLIENT_INSTALL_PATH="'$userpath'/.local/share/Steam" \' >> ~/Native2Proton/$appid/rungame.sh
     echo '"'$protonpath'/dist/bin//wine64" "${@:-${DEF_CMD[@]}}"' >> ~/Native2Proton/$appid/rungame.sh
     echo "Runner created. Launch game with: '~/Native2Proton/$appid/rungame.sh'"
