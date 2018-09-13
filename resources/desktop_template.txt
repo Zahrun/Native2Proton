@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Exec=/bin/bash "{0}"
+Icon="{1}/resources/n2p.png"
+Name={2} (N2P)
+GenericName=Native2Proton Launcher for {2}
+Comment=
+Encoding=UTF-8
+Terminal=true
+Type=Application
+Categories=Games
