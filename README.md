@@ -2,13 +2,15 @@
 
 Native2Proton is a runner for forcing the install and execution of Windows versions of Steam games rather than running the native Linux version.
 
+Requires python3
+
 # Using Native2Proton
 
 To clone the repo: 
 
-```git clone https://github.com/Holston5/Native2Proton.git && cd Native2Proton && chmod +x Native2Proton```
+```git clone https://github.com/Holston5/Native2Proton.git && cd Native2Proton```
 
-Run with `./native2proton`
+Run with `./native2proton.py`
 
 The Steam ID for the game you wish to install is required.  It can be found in the url of the steam store page for the game.
 
