@@ -2,7 +2,7 @@
 
 Native2Proton is a runner for forcing the install and execution of Windows versions of Steam games rather than running the native Linux version.
 
-Requires python3
+Requires python3 and wget
 
 # Using Native2Proton
 
