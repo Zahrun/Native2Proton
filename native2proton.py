@@ -140,7 +140,10 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
         storepage = urlopen("https://store.steampowered.com/app/"+app_id)
         data = storepage.read()
         app_name = re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)
-        app_name = html.unescape(app_name[0])
+        if app_name != None:
+            app_name = html.unescape(app_name[0])
+        else: 
+            app_name = input("Unable to get game name automatically.  Please enter game name (eg: Arma 3): ") 
         print("Got: "+app_name)
 
         #download game data
