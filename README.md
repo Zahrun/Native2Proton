@@ -21,6 +21,9 @@ Detection of your steam install location should be automatic and Native2Proton a
 Games installed with Native2Proton are best added to your Steam client as a non-Steam game.
 To do this point Steam to the .desktop shortcut created in "~/.local/share/native2proton/launchers" and set the Launch Options for the shortcut to "/home/user/.local/share/native2proton/$steam_app_id/$runner_name.sh
 
-# Known limitations
+# Known limitations & Issues
 
 Not every game will work due to DRM and anti-cheat methods they might employ.  Some games might also require additional libraries like corefonts or vcruntimes.  These can usually be installed with Native2Proton's builtin winetricks option.  
+
+Native2Proton is a wrapper Proton and the technologies it uses including, DXVK and as such all warnings for those apply here.
+Some technologies in DXVK have been known to get players banned where the game uses anti-cheat technology.  Use DXVK and Native2Proton at your own risk. 
