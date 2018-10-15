@@ -142,6 +142,10 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
         app_name = re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)
         if app_name:
             app_name = html.unescape(app_name[0])
+
+            # clean escape codes like \xe2\x80\x94
+            unicode = app_name.encode('utf-8').decode('unicode_escape')
+            app_name = ''.join(ch for ch in unicode if ch<'\x80')
         else: 
             app_name = input("Unable to get game name automatically.  Please enter game name (eg: Arma 3): ") 
         print("Got: "+app_name)
