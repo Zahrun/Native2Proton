@@ -45,7 +45,7 @@ def n2p_config(home, base_dir, config):
                         print(proton_dir)
     while proton_dir is None:
         proton_dir = input("Couldn't find Proton, please enter full path to Proton (eg: Steam_Library/steamapps/common/Proton 3.7):  ")
-        if not os.path.isfile(proton_dir+"/user_settings.py"):
+        if not (os.path.isfile(proton_dir+"/user_settings.py") or os.path.isfile(proton_dir+"/user_settings_sample.py")):
             print("Proton not found in given directory, please try again")
             proton_dir = None
     print("Proton located: "+proton_dir)
@@ -209,7 +209,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 prefix_dir = base_dir+"/"+prefixes[int(prefix_choice)]+"/pfx"
                 app_id = base_dir+"/"+prefixes[int(prefix_choice)]
     print("Prefix: "+prefix_dir)
-         
+    time.sleep(2)     
         
 
     
