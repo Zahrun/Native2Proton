@@ -412,10 +412,10 @@ else:
 
 print("Default download location: "+n2p_library)
 print("Proton location: "+proton_dir)
-menulist = ["Install game", "Use winetricks on prefix", "Install Non-Steam App [Experimental]", "Quit"]
+menulist = ["Install game", "Use winetricks on prefix", "Install Non-Steam App [Experimental]", "Recreate config", "Quit"]
 for index, menuitem in enumerate(menulist):
     print("["+str(index)+"] "+ menuitem)
-choice = input("What would you like to do?")
+choice = input("What would you like to do? ")
 
 if choice == "0":
     install_game(base_dir, n2p_library, proton_dir, steam_dir, "steam")
@@ -424,4 +424,6 @@ elif choice == "1":
 elif choice == "2":
     install_game(base_dir, n2p_library, proton_dir, steam_dir, "nonsteam")
 elif choice == "3":
+    n2p_config(home, base_dir, config)
+elif choice == "4":
     sys.exit()
