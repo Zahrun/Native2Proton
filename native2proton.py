@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os, sys, re, configparser, subprocess, time, shutil, html
 from urllib.request import urlopen
+from requests import get
 
 
 def n2p_config(home, base_dir, config):
@@ -137,29 +138,33 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
 
     if app_type == "steam":
         while True:
-            app_id = input("Please enter the Steam app ID or the game name (eg: Arma 3): ")
+            app = input("Please enter the Steam app ID or the game name (eg: Arma 3): ")
+            app_dictionary = get('http://api.steampowered.com/ISteamApps/GetAppList/v0001/').json()
 
-            # get app name from store
+            # get app information from steam api
+            conflict_aware = False
+            for i in app_dictionary['applist']['apps']['app']:
+                if (i['name'] == app or i['appid'].__str__() == app) and not conflict_aware:
+                    app_name = i['name']
+                    app_id = i['appid'].__str__()
+                    conflict_aware = True
 
-            storepage = urlopen("https://store.steampowered.com/app/" + app_id)
-            data = storepage.read()
+                # in case the game name has been saved as an app id (e.g. contains only numbers)
+                elif (i['name'] == app or i['appid'].__str__() == app) and conflict_aware:
+                    print("Encountered conflict:")
+                    print("[1] " + app_name + " (ID: " + app_id + ")")
+                    print("[2] " + i['name'] + " (ID: " + i['appid'] + ")")
+                    if input("Choose the correct game you wish to install: ") == "2":
+                        app_name = i['name']
+                        app_id = i['appid'].__str__()
+                    else:
+                        break
 
-            try:
-                app_name = html.unescape(re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)[0])
-                # clean escape codes like \xe2\x80\x94
-                unicode = app_name.encode('utf-8').decode('unicode_escape')
-                app_name = ''.join(ch for ch in unicode if ch < '\x80')
-
-            except Exception:
-                #in case the app name is a digit
-                app_name = app_id
-                pass
-
-            print("Got the game name: " + app_name)
+            print("Got: " + app_name + " (ID: " + app_id + ")")
             if input("Is that correct? (y/n)") == "y":
                 break
 
-        #download game data
+        # download game data
         steam_cmd(base_dir, n2p_library, app_name, app_id)
         exe_list = []
         list_id = 0
