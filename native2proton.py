@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import os, sys, re, configparser, subprocess, time, shutil, html
-from urllib.request import urlopen
+import os, sys, re, configparser, subprocess, time, shutil
 from requests import get
 
 
