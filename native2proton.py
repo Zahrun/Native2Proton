@@ -140,24 +140,21 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
             app_id = input("Please enter the Steam app ID or the game name (eg: Arma 3): ")
 
             # get app name from store
-            #current app ids range up to 6 digits; set to 7 for safety
-            if len(app_id) <= 7 and app_id.isdecimal():
-                storepage = urlopen("https://store.steampowered.com/app/" + app_id)
-                data = storepage.read()
 
-                try:
-                    app_name = html.unescape(re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)[0])
-                    # clean escape codes like \xe2\x80\x94
-                    unicode = app_name.encode('utf-8').decode('unicode_escape')
-                    app_name = ''.join(ch for ch in unicode if ch < '\x80')
+            storepage = urlopen("https://store.steampowered.com/app/" + app_id)
+            data = storepage.read()
 
-                except Exception:
-                    #in case the app name is a digit
-                    app_name = app_id
-                    pass
+            try:
+                app_name = html.unescape(re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)[0])
+                # clean escape codes like \xe2\x80\x94
+                unicode = app_name.encode('utf-8').decode('unicode_escape')
+                app_name = ''.join(ch for ch in unicode if ch < '\x80')
 
-            else:
+            except Exception:
+                #in case the app name is a digit
                 app_name = app_id
+                pass
+
             print("Got the game name: " + app_name)
             if input("Is that correct? (y/n)") == "y":
                 break
