@@ -37,7 +37,7 @@ def n2p_config(home, base_dir, config):
             libraries.append(steamapps_dir+"/common")
         #Search each library location looking for a Proton install
         for library in libraries:
-            
+
             for findproton in (os.listdir(library)):
                 if str(findproton).startswith("Proton "):
                     if (os.path.isfile(library+"/"+findproton+"/user_settings.py")) or (os.path.isfile(library+"/"+findproton+"/user_settings.sample.py")):
@@ -94,11 +94,13 @@ def n2p_config(home, base_dir, config):
     config_file.close()
     return steam_dir, proton_dir, n2p_library, winetricks_dir
 
+
 def full_file(src, dst):
     if os.path.islink(src):
         os.symlink(os.readlink(src), dst)
     else:
         shutil.copy(src,dst)
+
 
 def copy_prefix(src, dst):
     for src_dir, dirs, files in os.walk(src):
@@ -129,31 +131,41 @@ def get_user_prefixes(base_dir):
     app_id = "UP"+(str(num_prefixes).zfill(4))
     print("New prefix: ")
     return app_id
-    
+
+
 def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
 
     if app_type == "steam":
-        app_id = input("Please enter the Steam app ID: ")
+        while True:
+            app_id = input("Please enter the Steam app ID or the game name (eg: Arma 3): ")
 
+            # get app name from store
+            #current app ids range up to 6 digits; set to 7 for safety
+            if len(app_id) <= 7 and app_id.isdecimal():
+                storepage = urlopen("https://store.steampowered.com/app/" + app_id)
+                data = storepage.read()
 
-        #get app name from store
-        storepage = urlopen("https://store.steampowered.com/app/"+app_id)
-        data = storepage.read()
-        app_name = re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)
-        if app_name:
-            app_name = html.unescape(app_name[0])
+                try:
+                    app_name = html.unescape(re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)[0])
+                    # clean escape codes like \xe2\x80\x94
+                    unicode = app_name.encode('utf-8').decode('unicode_escape')
+                    app_name = ''.join(ch for ch in unicode if ch < '\x80')
 
-            # clean escape codes like \xe2\x80\x94
-            unicode = app_name.encode('utf-8').decode('unicode_escape')
-            app_name = ''.join(ch for ch in unicode if ch<'\x80')
-        else: 
-            app_name = input("Unable to get game name automatically.  Please enter game name (eg: Arma 3): ") 
-        print("Got: "+app_name)
+                except Exception:
+                    #in case the app name is a digit
+                    app_name = app_id
+                    pass
+
+            else:
+                app_name = app_id
+            print("Got the game name: " + app_name)
+            if input("Is that correct? (y/n)") == "y":
+                break
 
         #download game data
-        steam_cmd(base_dir, n2p_library, app_name, app_id)  
+        steam_cmd(base_dir, n2p_library, app_name, app_id)
         exe_list = []
-        list_id=0
+        list_id = 0
         for dirpath, dirnames, filenames in os.walk(n2p_library+"/"+app_name):
             for filename in [f for f in filenames if f.endswith(".exe")]:
                 print("[" + str(list_id) + "] " + os.path.join(dirpath, filename))
@@ -304,6 +316,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
             subprocess.call(["/bin/bash", filename])
     print("App/Game has been installed")
     return
+
 
 def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     # Create the prefix.  Copy default from Proton
