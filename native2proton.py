@@ -452,7 +452,7 @@ def use_winetricks(base_dir):
     for index, prefix in enumerate(prefixes):
         print("["+str(index)+"] "+prefix)
     print("[m] Enter prefix directory manually")
-      
+
     prefix_choice = input("Select prefix: ")
     if prefix_choice == "m":
         prefix = input("Enter prefix directory in full: (eg /home/you/prefix2")
@@ -460,14 +460,28 @@ def use_winetricks(base_dir):
         prefix = base_dir+"/"+prefixes[int(prefix_choice)]+"/pfx"
     print("Prefix: "+prefix)
     input("Stop")
+
     os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
     os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix
-         
+    if not os.path.isdir(prefix + "/drive_c/Program Files (x86)"):
+        use_32bit = True
+    else:
+        use_32bit = False
+
+    if use_32bit:
+        print("Using workaround for 32bit prefix...")
+        if os.path.isdir(prefix + "/drive_c/windows/syswow64"):
+            os.rename(prefix + "/drive_c/windows/syswow64", prefix + "/drive_c/windows/~syswow64")
+
     exec_cmd = input("Enter winetricks command (eg: winetricks corefonts xact)")
     splitcmd = exec_cmd.split()
     splitcmd[0] = base_dir+"/.winetricks/winetricks"
     subprocess.call(splitcmd)
+
+    if use_32bit:
+        print("Reverting workaround for 32bit prefix...")
+        os.rename(prefix + "/drive_c/windows/~syswow64", prefix + "/drive_c/windows/syswow64")
 
             
 def steam_cmd(base_dir, n2p_library, app_name,app_id):
