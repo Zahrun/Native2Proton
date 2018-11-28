@@ -164,7 +164,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 break
 
         # download game data
-        # steam_cmd(base_dir, n2p_library, app_name, app_id)
+        steam_cmd(base_dir, n2p_library, app_name, app_id)
         exe_list = []
         list_id = 0
         for dirpath, dirnames, filenames in os.walk(n2p_library+"/"+app_name):
