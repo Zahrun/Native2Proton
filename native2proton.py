@@ -280,7 +280,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
     shortcut_format = shortcut_data.format(filename, base_dir, app_name)
     if not os.path.isdir(base_dir+"/launchers"):
         os.mkdir(base_dir+"/launchers")
-    f = open(base_dir+"/launchers/"+app_name+" N2P.desktop", 'w')
+    f = open(base_dir+"/launchers/"+app_name.replace(':','')+" N2P.desktop", 'w')
     f.write(shortcut_format)
     f.close()
     if app_type == "steam":
