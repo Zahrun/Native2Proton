@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import os, sys, re, configparser, subprocess, time, shutil, html
-from urllib.request import urlopen
+import os, sys, re, configparser, subprocess, time, shutil
+from requests import get
 
 
 def n2p_config(home, base_dir, config):
@@ -37,7 +37,7 @@ def n2p_config(home, base_dir, config):
             libraries.append(steamapps_dir+"/common")
         #Search each library location looking for a Proton install
         for library in libraries:
-            
+
             for findproton in (os.listdir(library)):
                 if str(findproton).startswith("Proton "):
                     if (os.path.isfile(library+"/"+findproton+"/user_settings.py")) or (os.path.isfile(library+"/"+findproton+"/user_settings.sample.py")):
@@ -94,11 +94,13 @@ def n2p_config(home, base_dir, config):
     config_file.close()
     return steam_dir, proton_dir, n2p_library, winetricks_dir
 
+
 def full_file(src, dst):
     if os.path.islink(src):
         os.symlink(os.readlink(src), dst)
     else:
         shutil.copy(src,dst)
+
 
 def copy_prefix(src, dst):
     for src_dir, dirs, files in os.walk(src):
@@ -129,31 +131,42 @@ def get_user_prefixes(base_dir):
     app_id = "UP"+(str(num_prefixes).zfill(4))
     print("New prefix: ")
     return app_id
-    
+
+
 def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
 
     if app_type == "steam":
-        app_id = input("Please enter the Steam app ID: ")
+        while True:
+            app = input("Please enter the Steam app ID or the game name (eg: Arma 3): ")
+            app_dictionary = get('http://api.steampowered.com/ISteamApps/GetAppList/v0001/').json()
 
+            # get app information from steam api
+            conflict_aware = False
+            for i in app_dictionary['applist']['apps']['app']:
+                if (i['name'] == app or i['appid'].__str__() == app) and not conflict_aware:
+                    app_name = i['name']
+                    app_id = i['appid'].__str__()
+                    conflict_aware = True
 
-        #get app name from store
-        storepage = urlopen("https://store.steampowered.com/app/"+app_id)
-        data = storepage.read()
-        app_name = re.findall(r'<div class="apphub_AppName">(.*?)</div>', str(data), re.DOTALL)
-        if app_name:
-            app_name = html.unescape(app_name[0])
+                # in case the game name has been saved as an app id (e.g. contains only numbers)
+                elif (i['name'] == app or i['appid'].__str__() == app) and conflict_aware:
+                    print("Encountered conflict:")
+                    print("[1] " + app_name + " (ID: " + app_id + ")")
+                    print("[2] " + i['name'] + " (ID: " + i['appid'] + ")")
+                    if input("Choose the correct game you wish to install: ") == "2":
+                        app_name = i['name']
+                        app_id = i['appid'].__str__()
+                    else:
+                        break
 
-            # clean escape codes like \xe2\x80\x94
-            unicode = app_name.encode('utf-8').decode('unicode_escape')
-            app_name = ''.join(ch for ch in unicode if ch<'\x80')
-        else: 
-            app_name = input("Unable to get game name automatically.  Please enter game name (eg: Arma 3): ") 
-        print("Got: "+app_name)
+            print("Got: " + app_name + " (ID: " + app_id + ")")
+            if input("Is that correct? (y/n)") == "y":
+                break
 
-        #download game data
-        steam_cmd(base_dir, n2p_library, app_name, app_id)  
+        # download game data
+        steam_cmd(base_dir, n2p_library, app_name, app_id)
         exe_list = []
-        list_id=0
+        list_id = 0
         for dirpath, dirnames, filenames in os.walk(n2p_library+"/"+app_name):
             for filename in [f for f in filenames if f.endswith(".exe")]:
                 print("[" + str(list_id) + "] " + os.path.join(dirpath, filename))
@@ -161,22 +174,32 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 list_id = list_id + 1
         exe_num = input("Please select the game executable by number: ")
         exe = exe_list[int(exe_num)]
+
         # Create symlink in .local/share/native2proton/app_id to data
         if  not os.path.isdir(base_dir+"/"+app_id):
             os.makedirs(base_dir+"/"+app_id, 0o755)
         prefix_dir = base_dir+"/"+app_id+"/pfx"
         if not os.path.isdir(base_dir+"/"+app_id+"/data"):
             os.symlink(n2p_library+"/"+app_name, base_dir+"/"+app_id+"/data")
-        create_prefix(base_dir, app_id, proton_dir, prefix_dir)
+
+        while True:
+            prefix_arch = input("Do you want to create a 64bit [1] or 32bit [2] Wine Prefix for this game? ")
+            if prefix_arch == "1":
+                create_prefix(base_dir, app_id, proton_dir, prefix_dir)
+                dst = prefix_dir + "/drive_c/Program Files (x86)/Steam"
+                break
+            elif prefix_arch == "2":
+                create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir)
+                dst = prefix_dir + "/drive_c/Program Files/Steam"
+                break
+
         print("Copying Steam dll's")
-        dst = prefix_dir + "/drive_c/Program Files (x86)/Steam"
         os.makedirs(dst, exist_ok=True)
         copy_dlls = ["steamclient.dll", "steamclient64.dll", "Steam.dll"]
         print("Steam DIR:"+steam_dir )
         for dll in copy_dlls:
             print(steam_dir + "/legacycompat/"+dll)
             try:
-                            
                 if os.path.isfile(dst+"/"+dll):
                     os.remove(dst+"/"+dll)
                     print("removed file")
@@ -190,9 +213,17 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
         if input("Do you need to create a new prefix? (y/n)") == "y":
             app_id = get_user_prefixes(base_dir)
             prefix_dir = base_dir+"/"+app_id+"/pfx"
-            create_prefix(base_dir, app_id, proton_dir, prefix_dir)
+
+            while True:
+                prefix_arch = input("Do you want to create a 64bit [1] or 32bit [2] Wine Prefix for this game? ")
+                if prefix_arch == "1":
+                    create_prefix(base_dir, app_id, proton_dir, prefix_dir)
+                    break
+                elif prefix_arch == "2":
+                    create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir)
+                    break
+
         else:
-            
             prefixes = []
             all_paths = os.listdir(base_dir) 
             for path in all_paths:
@@ -209,9 +240,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 prefix_dir = base_dir+"/"+prefixes[int(prefix_choice)]+"/pfx"
                 app_id = base_dir+"/"+prefixes[int(prefix_choice)]
     print("Prefix: "+prefix_dir)
-    time.sleep(2)     
-        
-
+    time.sleep(2)
     
     winetricks = base_dir+'/.winetricks/winetricks' 
 
@@ -305,6 +334,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
     print("App/Game has been installed")
     return
 
+
 def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     # Create the prefix.  Copy default from Proton
     if not os.path.isdir(base_dir+"/"+app_id+"/pfx"):
@@ -316,7 +346,7 @@ def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
     os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix_dir
-    os.environ["LD_LIBRARY_PATH"]=proton_dir+"/dist/lib64:"+proton_dir+"/dist/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
+    os.environ["LD_LIBRARY_PATH"] = proton_dir+"/dist/lib64:"+proton_dir+"/dist/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
     wine = proton_dir+"/dist/bin/wineserver"
     #boot prefix by calling Proton's wineserver wineboot
     p = subprocess.call([wine, "-w", "wineboot"])
@@ -345,8 +375,74 @@ def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
     shutil.copy(proton_dir + "/dist/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
     shutil.copy(proton_dir + "/dist/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
-            
-        
+
+
+def create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir):
+    print("Creating 32bit Wine Prefix...")
+    os.makedirs(base_dir + "/" + app_id + "/pfx", 0o755, exist_ok=True)
+
+    # Create the prefix.  Copy default from Proton
+    copy_prefix(proton_dir + "/dist/share/default_pfx", prefix_dir)
+    print("Proton: " + proton_dir)
+
+    os.environ["WINEDLLPATH"] = proton_dir + "/dist/lib64/wine:"+proton_dir + "/dist/lib/wine"
+    os.environ["PATH"] = proton_dir + "/dist/bin/:" + proton_dir + "/dist/lib/:" + proton_dir + "/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+    os.environ["WINEPREFIX"] = prefix_dir
+    os.environ["LD_LIBRARY_PATH"] = proton_dir + "/dist/lib64:" + proton_dir + "/dist/lib:" + steam_dir + "/ubuntu12_32:" + steam_dir + "/ubuntu12_32/panorama:"
+    wine = proton_dir + "/dist/bin/wineserver"
+
+    # boot prefix by calling Proton's wineserver wineboot
+    p_64 = subprocess.call([wine, "-w", "wineboot"])
+    i = 5
+    for c in range(i):
+        print("Finishing... ("+str(i)+")")
+        i = i-1
+        time.sleep(1)
+    # above loop is workaround to ensure process returns safely.  For some reason wineserver does not always call/return wineboot properly.
+
+    shutil.rmtree(prefix_dir, ignore_errors=True)
+    os.makedirs(base_dir + "/" + app_id + "/pfx", 0o755, exist_ok=True)
+
+    # Resetting environment variables to stay clear of any possible interferences
+    os.environ["WINEARCH"] = "win32"
+    os.environ["WINEDLLPATH"] = ""
+    os.environ["PATH"] = "/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+    os.environ["LD_LIBRARY_PATH"] = ""
+
+    try:
+        p_32 = subprocess.call('winecfg')
+    except Exception:
+        p_32 = subprocess.call('/usr/bin/winecfg')
+        pass
+
+    os.makedirs(base_dir + "/" + app_id + "/pfx/drive_c/windows/syswow64", exist_ok=True)
+
+    print("Installing dxvk...")
+
+    dxvk_dst = prefix_dir + "/drive_c/windows/system32"
+    dxvk_dst_32 = prefix_dir + "/drive_c/windows/syswow64"
+    if os.path.isfile(dxvk_dst + "/d3d11.dll"):
+        os.remove(dxvk_dst + "/d3d11.dll")
+    if os.path.isfile(dxvk_dst + "/dxgi.dll"):
+        os.remove(dxvk_dst + "/dxgi.dll")
+    if os.path.isfile(dxvk_dst_32 + "/d3d11.dll"):
+        os.remove(dxvk_dst_32 + "/d3d11.dll")
+    if os.path.isfile(dxvk_dst_32 + "/dxgi.dll"):
+        os.remove(dxvk_dst_32 + "/dxgi.dll")
+
+    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/d3d11.dll", dxvk_dst + "/d3d11.dll")
+    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
+    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
+    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
+
+    print("32bit Wine Prefix successfully created.")
+    print("Please execute the following commands to set Proton to 32bit before starting the game")
+    print("$ cd ~/.steam/steam/steamapps/common/Proton\ 3.7/")
+    print("$ sed -i 's/wine64/wine/' proton")
+    print("Please run the following command after your session to reset Proton back to default")
+    print("$ sed -i 's/wine/wine64/' proton")
+
+
 def use_winetricks(base_dir):
     prefixes = []
     all_paths = os.listdir(base_dir) 
@@ -356,7 +452,7 @@ def use_winetricks(base_dir):
     for index, prefix in enumerate(prefixes):
         print("["+str(index)+"] "+prefix)
     print("[m] Enter prefix directory manually")
-      
+
     prefix_choice = input("Select prefix: ")
     if prefix_choice == "m":
         prefix = input("Enter prefix directory in full: (eg /home/you/prefix2")
@@ -364,14 +460,28 @@ def use_winetricks(base_dir):
         prefix = base_dir+"/"+prefixes[int(prefix_choice)]+"/pfx"
     print("Prefix: "+prefix)
     input("Stop")
+
     os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
     os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix
-         
+    if not os.path.isdir(prefix + "/drive_c/Program Files (x86)"):
+        use_32bit = True
+    else:
+        use_32bit = False
+
+    if use_32bit:
+        print("Using workaround for 32bit prefix...")
+        if os.path.isdir(prefix + "/drive_c/windows/syswow64"):
+            os.rename(prefix + "/drive_c/windows/syswow64", prefix + "/drive_c/windows/~syswow64")
+
     exec_cmd = input("Enter winetricks command (eg: winetricks corefonts xact)")
     splitcmd = exec_cmd.split()
     splitcmd[0] = base_dir+"/.winetricks/winetricks"
     subprocess.call(splitcmd)
+
+    if use_32bit:
+        print("Reverting workaround for 32bit prefix...")
+        os.rename(prefix + "/drive_c/windows/~syswow64", prefix + "/drive_c/windows/syswow64")
 
             
 def steam_cmd(base_dir, n2p_library, app_name,app_id):
@@ -401,7 +511,7 @@ steam_user_id = None
 if os.path.isfile(base_dir+"/settings.conf"):
     print("Config found")
     config_file = base_dir+"/settings.conf"
-    config.readfp(open(r''+config_file))
+    config.read_file(open(r''+config_file))
     n2p_library = config.get('DEFAULTS', 'n2p_library')
     proton_dir = config.get('DEFAULTS', 'proton_dir')
     steam_dir = config.get('DEFAULTS', 'steam_dir')
