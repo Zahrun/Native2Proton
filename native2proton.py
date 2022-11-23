@@ -263,11 +263,14 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 print("File does not exist, check it was entered correctly")
                 installer = None
         #installer = '"'+installer+'"'
-        wine = proton_dir+"/dist/bin/wineserver"
-        os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
-        os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+        ext="/dist"
+        if not os.path.isdir(proton_dir+"/dist"):
+            ext="/files"
+        wine = proton_dir+ext+"/bin/wineserver"
+        os.environ["WINEDLLPATH"] = proton_dir+ext+"/lib64/wine:"+proton_dir+ext+"/lib/wine"
+        os.environ["PATH"] = proton_dir+ext+"/bin/:"+proton_dir+ext+"/lib/:"+proton_dir+ext+"/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
         os.environ["WINEPREFIX"]=prefix_dir
-        os.environ["LD_LIBRARY_PATH"]=proton_dir+"/dist/lib64:"+proton_dir+"/dist/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
+        os.environ["LD_LIBRARY_PATH"]=proton_dir+ext+"/lib64:"+proton_dir+ext+"/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
         p = subprocess.call([wine, installer, "-w"])
         exe = None
         while exe == None:
@@ -340,14 +343,17 @@ def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     if not os.path.isdir(base_dir+"/"+app_id+"/pfx"):
         os.makedirs(base_dir+"/"+app_id+"/pfx", 0o755)
     print("Creating Wine Prefix...")
-    copy_prefix(proton_dir + "/dist/share/default_pfx", prefix_dir)
+    ext="/dist"
+    if not os.path.isdir(proton_dir+"/dist"):
+        ext="/files"
+    copy_prefix(proton_dir + ext + "/share/default_pfx", prefix_dir)
     print("Proton: "+proton_dir)
     
-    os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
-    os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+    os.environ["WINEDLLPATH"] = proton_dir+ext + "/lib64/wine:"+proton_dir+ext + "/lib/wine"
+    os.environ["PATH"] = proton_dir+ext + "/bin/:"+proton_dir+ext + "/lib/:"+proton_dir+ext + "/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix_dir
-    os.environ["LD_LIBRARY_PATH"] = proton_dir+"/dist/lib64:"+proton_dir+"/dist/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
-    wine = proton_dir+"/dist/bin/wineserver"
+    os.environ["LD_LIBRARY_PATH"] = proton_dir+ext + "/lib64:"+proton_dir+ext + "/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
+    wine = proton_dir+ext + "/bin/wineserver"
     #boot prefix by calling Proton's wineserver wineboot
     p = subprocess.call([wine, "-w", "wineboot"])
     i=5
@@ -371,10 +377,10 @@ def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     if os.path.isfile(dxvk_dst_32+"/dxgi.dll"):
         os.remove(dxvk_dst_32+"/dxgi.dll")      
     
-    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/d3d11.dll", dxvk_dst + "/d3d11.dll")
-    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
-    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
-    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
+    shutil.copy(proton_dir + ext + "/lib64/wine/dxvk/d3d11.dll", dxvk_dst + "/d3d11.dll")
+    shutil.copy(proton_dir + ext + "/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
+    shutil.copy(proton_dir + ext + "/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
+    shutil.copy(proton_dir + ext + "/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
 
 
 def create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir):
@@ -382,14 +388,17 @@ def create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir):
     os.makedirs(base_dir + "/" + app_id + "/pfx", 0o755, exist_ok=True)
 
     # Create the prefix.  Copy default from Proton
-    copy_prefix(proton_dir + "/dist/share/default_pfx", prefix_dir)
+    ext="/dist"
+    if not os.path.isdir(proton_dir+"/dist"):
+        ext="/files"
+    copy_prefix(proton_dir + ext + "/share/default_pfx", prefix_dir)
     print("Proton: " + proton_dir)
 
-    os.environ["WINEDLLPATH"] = proton_dir + "/dist/lib64/wine:"+proton_dir + "/dist/lib/wine"
-    os.environ["PATH"] = proton_dir + "/dist/bin/:" + proton_dir + "/dist/lib/:" + proton_dir + "/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+    os.environ["WINEDLLPATH"] = proton_dir + ext + "/lib64/wine:"+proton_dir + ext + "/lib/wine"
+    os.environ["PATH"] = proton_dir + ext + "/bin/:" + proton_dir + ext + "/lib/:" + proton_dir + ext + "/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix_dir
-    os.environ["LD_LIBRARY_PATH"] = proton_dir + "/dist/lib64:" + proton_dir + "/dist/lib:" + steam_dir + "/ubuntu12_32:" + steam_dir + "/ubuntu12_32/panorama:"
-    wine = proton_dir + "/dist/bin/wineserver"
+    os.environ["LD_LIBRARY_PATH"] = proton_dir + ext + "/lib64:" + proton_dir + ext + "/lib:" + steam_dir + "/ubuntu12_32:" + steam_dir + "/ubuntu12_32/panorama:"
+    wine = proton_dir + ext + "/bin/wineserver"
 
     # boot prefix by calling Proton's wineserver wineboot
     p_64 = subprocess.call([wine, "-w", "wineboot"])
@@ -430,10 +439,10 @@ def create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir):
     if os.path.isfile(dxvk_dst_32 + "/dxgi.dll"):
         os.remove(dxvk_dst_32 + "/dxgi.dll")
 
-    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/d3d11.dll", dxvk_dst + "/d3d11.dll")
-    shutil.copy(proton_dir + "/dist/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
-    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
-    shutil.copy(proton_dir + "/dist/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
+    shutil.copy(proton_dir + ext + "/lib64/wine/dxvk/d3d11.dll", dxvk_dst + "/d3d11.dll")
+    shutil.copy(proton_dir + ext + "/lib64/wine/dxvk/dxgi.dll", dxvk_dst + "/dxgi.dll")
+    shutil.copy(proton_dir + ext + "/lib/wine/dxvk/d3d11.dll", dxvk_dst_32 + "/d3d11.dll")
+    shutil.copy(proton_dir + ext + "/lib/wine/dxvk/dxgi.dll", dxvk_dst_32 + "/dxgi.dll")
 
     print("32bit Wine Prefix successfully created.")
     print("Please execute the following commands to set Proton to 32bit before starting the game")
@@ -461,8 +470,11 @@ def use_winetricks(base_dir):
     print("Prefix: "+prefix)
     input("Stop")
 
-    os.environ["WINEDLLPATH"] = proton_dir+"/dist/lib64/wine:"+proton_dir+"/dist/lib/wine"
-    os.environ["PATH"] = proton_dir+"/dist/bin/:"+proton_dir+"/dist/lib/:"+proton_dir+"/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
+    ext="/dist"
+    if not os.path.isdir(proton_dir+"/dist"):
+        ext="/files"
+    os.environ["WINEDLLPATH"] = proton_dir+ext + "/lib64/wine:"+proton_dir+ext + "/lib/wine"
+    os.environ["PATH"] = proton_dir+ext + "/bin/:"+proton_dir+ext + "/lib/:"+proton_dir+ext + "/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix
     if not os.path.isdir(prefix + "/drive_c/Program Files (x86)"):
         use_32bit = True
