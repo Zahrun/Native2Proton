@@ -29,7 +29,7 @@ def n2p_config(home, base_dir, config):
         
         for line in open(steam_library,'r'):
             stripline = line.lstrip()
-            if stripline[1].isdigit():
+            if "path" in stripline:
                 if os.path.isdir(re.findall(r'"([^"]*)"', line)[1]+"/steamapps/common"):
                     libraries.append(re.findall(r'"([^"]*)"', line)[1]+"/steamapps/common")
         if not libraries:
