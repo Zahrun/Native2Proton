@@ -97,7 +97,7 @@ def n2p_config(home, base_dir, config):
 
 def full_file(src, dst):
     if os.path.islink(src):
-        os.symlink(os.readlink(src), dst)
+        os.symlink(os.path.realpath(src), dst)
     else:
         shutil.copy(src,dst)
 
