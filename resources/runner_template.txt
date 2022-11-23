@@ -12,4 +12,4 @@ PATH="{1}/dist/bin/:{1}/dist/lib/:{1}/dist/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:
         SteamAppId="{4}" \
         WINEDLLOVERRIDES="{5}" \
         STEAM_COMPAT_CLIENT_INSTALL_PATH="{2}" \
-"{1}/dist/bin//wine" "${{@:-${{DEF_CMD[@]}}}}"
+"{1}{6}/bin/wine" "${{@:-${{DEF_CMD[@]}}}}"

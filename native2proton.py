@@ -245,6 +245,9 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
     winetricks = base_dir+'/.winetricks/winetricks' 
 
     dll_overrides = None
+    ext="/dist"
+    if not os.path.isdir(proton_dir+"/dist"):
+        ext="/files"
     if app_type == "nonsteam":
         
         dll_overrides = input("Assuming you first need to run an installer or similar: Do you wish to set any DLL overrides now? (y/n)")
@@ -263,9 +266,6 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 print("File does not exist, check it was entered correctly")
                 installer = None
         #installer = '"'+installer+'"'
-        ext="/dist"
-        if not os.path.isdir(proton_dir+"/dist"):
-            ext="/files"
         wine = proton_dir+ext+"/bin/wineserver"
         os.environ["WINEDLLPATH"] = proton_dir+ext+"/lib64/wine:"+proton_dir+ext+"/lib/wine"
         os.environ["PATH"] = proton_dir+ext+"/bin/:"+proton_dir+ext+"/lib/:"+proton_dir+ext+"/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
@@ -290,9 +290,9 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
     runner_data = open(base_dir+"/resources/runner_template.txt", 'r').read()
     default_overrides = "xaudio2_7=n,b;dxgi=n;d3d11=n"
     if dll_overrides == None:
-        format_data = runner_data.format(exe, proton_dir, steam_dir, prefix_dir, app_id, default_overrides)
+        format_data = runner_data.format(exe, proton_dir, steam_dir, prefix_dir, app_id, default_overrides, ext)
     else:
-        format_data = runner_data.format(exe, proton_dir, steam_dir, prefix_dir, app_id, dll_overrides)
+        format_data = runner_data.format(exe, proton_dir, steam_dir, prefix_dir, app_id, dll_overrides, ext)
     filename = base_dir + "/" + app_id + "/" + app_name + ".sh"
 
     with open(filename, 'w') as runner:
