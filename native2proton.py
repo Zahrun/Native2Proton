@@ -163,7 +163,7 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
                 elif (i['name'] == app or i['appid'].__str__() == app) and conflict_aware:
                     print("Encountered conflict:")
                     print("[1] " + app_name + " (ID: " + app_id + ")")
-                    print("[2] " + i['name'] + " (ID: " + i['appid'] + ")")
+                    print("[2] " + i['name'] + " (ID: " + str(i['appid']) + ")")
                     if input("Choose the correct game you wish to install: ") == "2":
                         app_name = i['name']
                         app_id = i['appid'].__str__()
