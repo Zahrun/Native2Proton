@@ -281,7 +281,8 @@ def install_game(base_dir, n2p_library, proton_dir, steam_dir, app_type):
         os.environ["WINEDLLPATH"] = proton_dir+ext+"/lib64/wine:"+proton_dir+ext+"/lib/wine"
         os.environ["PATH"] = proton_dir+ext+"/bin/:"+proton_dir+ext+"/lib/:"+proton_dir+ext+"/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
         os.environ["WINEPREFIX"]=prefix_dir
-        os.environ["LD_LIBRARY_PATH"]=proton_dir+ext+"/lib64:"+proton_dir+ext+"/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
+        os.environ["LD_LIBRARY_PATH"]=proton_dir+ext+"/lib64:"+proton_dir+ext+"/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"+steam_dir+"/debian-installation/ubuntu12_32:"+steam_dir+"/debian-installation/ubuntu12_32/panorama:"
+
         p = subprocess.call([wine, installer, "-w"])
         exe = None
         while exe == None:
@@ -363,7 +364,8 @@ def create_prefix(base_dir, app_id, proton_dir, prefix_dir):
     os.environ["WINEDLLPATH"] = proton_dir+ext + "/lib64/wine:"+proton_dir+ext + "/lib/wine"
     os.environ["PATH"] = proton_dir+ext + "/bin/:"+proton_dir+ext + "/lib/:"+proton_dir+ext + "/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix_dir
-    os.environ["LD_LIBRARY_PATH"] = proton_dir+ext + "/lib64:"+proton_dir+ext + "/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"
+    os.environ["LD_LIBRARY_PATH"] = proton_dir+ext + "/lib64:"+proton_dir+ext + "/lib:"+steam_dir+"/ubuntu12_32:"+steam_dir+"/ubuntu12_32/panorama:"+steam_dir+"/debian-installation/ubuntu12_32:"+steam_dir+"/debian-installation/ubuntu12_32/panorama:"
+
     wine = proton_dir+ext + "/bin/wineserver"
     #boot prefix by calling Proton's wineserver wineboot
     p = subprocess.call([wine, "-w", "wineboot"])
@@ -408,7 +410,8 @@ def create_32bit_prefix(base_dir, app_id, proton_dir, prefix_dir):
     os.environ["WINEDLLPATH"] = proton_dir + ext + "/lib64/wine:"+proton_dir + ext + "/lib/wine"
     os.environ["PATH"] = proton_dir + ext + "/bin/:" + proton_dir + ext + "/lib/:" + proton_dir + ext + "/lib64/:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/snap/bin"
     os.environ["WINEPREFIX"] = prefix_dir
-    os.environ["LD_LIBRARY_PATH"] = proton_dir + ext + "/lib64:" + proton_dir + ext + "/lib:" + steam_dir + "/ubuntu12_32:" + steam_dir + "/ubuntu12_32/panorama:"
+    os.environ["LD_LIBRARY_PATH"] = proton_dir + ext + "/lib64:" + proton_dir + ext + "/lib:" + steam_dir + "/ubuntu12_32:" + steam_dir + "/ubuntu12_32/panorama:"+steam_dir+"/debian-installation/ubuntu12_32:"+steam_dir+"/debian-installation/ubuntu12_32/panorama:"
+
     wine = proton_dir + ext + "/bin/wineserver"
 
     # boot prefix by calling Proton's wineserver wineboot
