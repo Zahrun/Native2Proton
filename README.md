@@ -4,6 +4,16 @@ Native2Proton is a runner for forcing the install and execution of Windows versi
 
 Requires python3 and wget
 
+README: This script is not required anymore since Valve implemented this in steam. Please see https://github.com/ValveSoftware/steam-for-linux/issues/5638 
+
+
+    In Steam settings in the category "Steam Play" check "Enable Steam Play for all other titles".
+
+    Then right-click on the game in question, open "Properties", and on the bottom of the "General" tab, check "Force the use of a specific Steam Play compatibility tool".
+
+    That will tell Steam to run the game via Proton even if there is a native Linux version available.
+
+
 # Using Native2Proton
 
 To clone the repo: 
