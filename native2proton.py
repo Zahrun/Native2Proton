@@ -36,13 +36,24 @@ def n2p_config(home, base_dir, config):
             #user has no stored libraries, use default location
             libraries.append(steamapps_dir+"/common")
         #Search each library location looking for a Proton install
+        proton_dirs = []
         for library in libraries:
 
             for findproton in (os.listdir(library)):
                 if str(findproton).startswith("Proton "):
                     if (os.path.isfile(library+"/"+findproton+"/user_settings.py")) or (os.path.isfile(library+"/"+findproton+"/user_settings.sample.py")):
-                        proton_dir = str(library+"/"+findproton)
-                        print(proton_dir)
+                        current = str(library+"/"+findproton)
+                        proton_dirs.append(current)
+        if len(proton_dirs) > 1:
+            i = 0
+            print("Found multiple Proton version")
+            for proton in proton_dirs:
+                print("[" + str(i) + "] " + proton)
+                i = i + 1
+            choice = input("Which version of proton do you want to use? ")
+            proton_dir = proton_dirs[int(choice)]
+        elif len(proton_dirs) == 1:
+            proton_dir = proton_dirs[0]
     while proton_dir is None:
         proton_dir = input("Couldn't find Proton, please enter full path to Proton (eg: Steam_Library/steamapps/common/Proton 3.7):  ")
         if not (os.path.isfile(proton_dir+"/user_settings.py") or os.path.isfile(proton_dir+"/user_settings.sample.py")):
